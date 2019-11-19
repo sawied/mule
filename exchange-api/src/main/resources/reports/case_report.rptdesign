@@ -12,11 +12,156 @@
     <property name="bidiLayoutOrientation">ltr</property>
     <property name="imageDPI">96</property>
     <data-sources>
-        <script-data-source name="result" id="42"/>
+        <script-data-source name="datasource" id="171"/>
     </data-sources>
+    <data-sets>
+        <script-data-set name="terms" id="172">
+            <list-property name="resultSetHints">
+                <structure>
+                    <property name="position">0</property>
+                    <property name="name">term</property>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">term</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">term</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">datasource</property>
+            <method name="open"><![CDATA[terms=ds.conditions;
+iter=terms.iterator();]]></method>
+            <method name="fetch"><![CDATA[if(iter.hasNext()){
+item=iter.next();
+row["term"]=item;
+return true;
+}else{
+return false;
+}]]></method>
+        </script-data-set>
+        <script-data-set name="incidents" id="176">
+            <list-property name="resultSetHints">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">park</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">attraction</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">occurenceOn</property>
+                    <property name="dataType">date-time</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">incidentNo</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">incidentType</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">description</property>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">park</property>
+                    <text-property name="displayName">PARK</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attraction</property>
+                    <text-property name="displayName">ATTRACTION</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">occurenceOn</property>
+                    <text-property name="displayName">OCCURENCE ON</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">incidentNo</property>
+                    <text-property name="displayName">INCIDENT NO.</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">incidentType</property>
+                    <text-property name="displayName">INCIDENT TYPE</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">description</property>
+                    <text-property name="displayName">BRIEF DESCRIPTION</text-property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">park</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">attraction</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">occurenceOn</property>
+                        <property name="dataType">date-time</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">incidentNo</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">incidentType</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">description</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">datasource</property>
+            <method name="open"><![CDATA[icases=ds.cases;
+iter=icases.iterator();]]></method>
+            <method name="fetch"><![CDATA[if(iter.hasNext()){
+icase=iter.next();
+row["park"]=icase.getPark();
+row["attraction"]=icase.getAttraction();
+row["occurenceOn"]=icase.getOccurenceOn();
+row["incidentNo"]=icase.getIncidentNo();
+row["incidentType"]=icase.getIncidentType();
+row["description"]=icase.getBriefDescription();
+return true;
+}else{
+return false;
+}]]></method>
+        </script-data-set>
+    </data-sets>
     <styles>
         <style name="margin" id="96">
-            <property name="marginTop">5pt</property>
+            <property name="marginTop">0.5in</property>
+            <property name="marginBottom">0.5pt</property>
         </style>
         <style name="table-border" id="97">
             <property name="borderBottomStyle">solid</property>
@@ -110,6 +255,193 @@ Resorts World at Sentosa
             </page-footer>
         </simple-master-page>
     </page-setup>
+    <body>
+        <text id="159">
+            <property name="style">margin</property>
+            <property name="contentType">html</property>
+            <text-property name="content"><![CDATA[<B>
+<FONT size="4">
+<VALUE-OF>ds.reportTitle.toUpperCase()</VALUE-OF>
+</FONT>
+</B>]]></text-property>
+        </text>
+        <grid id="160">
+            <property name="width">7.947916666666667in</property>
+            <column id="161">
+                <property name="width">2in</property>
+            </column>
+            <column id="162">
+                <property name="style">margin</property>
+            </column>
+            <row id="163">
+                <cell id="164">
+                    <property name="style">margin</property>
+                    <property name="backgroundColor">#E8E8E8</property>
+                    <text id="169">
+                        <property name="contentType">html</property>
+                        <text-property name="content"><![CDATA[<B>
+Filter Summary:
+</B>]]></text-property>
+                    </text>
+                </cell>
+                <cell id="165">
+                    <property name="style">margin</property>
+                    <property name="backgroundColor">#E8E8E8</property>
+                </cell>
+            </row>
+            <row id="166">
+                <cell id="167">
+                    <property name="style">margin</property>
+                    <property name="backgroundColor">#E8E8E8</property>
+                </cell>
+                <cell id="168">
+                    <property name="style">margin</property>
+                    <property name="backgroundColor">#E8E8E8</property>
+                    <list id="174">
+                        <property name="dataSet">terms</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">term</property>
+                                <text-property name="displayName">term</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["term"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <detail>
+                            <data id="175">
+                                <property name="resultSetColumn">term</property>
+                            </data>
+                        </detail>
+                    </list>
+                </cell>
+            </row>
+        </grid>
+        <table id="177">
+            <property name="dataSet">incidents</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">park</property>
+                    <text-property name="displayName">PARK</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["park"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">attraction</property>
+                    <text-property name="displayName">ATTRACTION</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["attraction"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">occurenceOn</property>
+                    <text-property name="displayName">OCCURENCE ON</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["occurenceOn"]</expression>
+                    <property name="dataType">date-time</property>
+                </structure>
+                <structure>
+                    <property name="name">incidentNo</property>
+                    <text-property name="displayName">INCIDENT NO.</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["incidentNo"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">incidentType</property>
+                    <text-property name="displayName">INCIDENT TYPE</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["incidentType"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">description</property>
+                    <text-property name="displayName">BRIEF DESCRIPTION</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["description"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <column id="211"/>
+            <column id="212"/>
+            <column id="213"/>
+            <column id="214"/>
+            <column id="215"/>
+            <column id="216"/>
+            <header>
+                <row id="178">
+                    <cell id="179">
+                        <label id="180">
+                            <text-property name="text">PARK</text-property>
+                        </label>
+                    </cell>
+                    <cell id="181">
+                        <label id="182">
+                            <text-property name="text">ATTRACTION</text-property>
+                        </label>
+                    </cell>
+                    <cell id="183">
+                        <label id="184">
+                            <text-property name="text">OCCURENCE ON</text-property>
+                        </label>
+                    </cell>
+                    <cell id="185">
+                        <label id="186">
+                            <text-property name="text">INCIDENT NO.</text-property>
+                        </label>
+                    </cell>
+                    <cell id="187">
+                        <label id="188">
+                            <text-property name="text">INCIDENT TYPE</text-property>
+                        </label>
+                    </cell>
+                    <cell id="189">
+                        <label id="190">
+                            <text-property name="text">BRIEF DESCRIPTION</text-property>
+                        </label>
+                    </cell>
+                </row>
+            </header>
+            <detail>
+                <row id="191">
+                    <cell id="192">
+                        <data id="193">
+                            <property name="resultSetColumn">park</property>
+                        </data>
+                    </cell>
+                    <cell id="194">
+                        <data id="195">
+                            <property name="resultSetColumn">attraction</property>
+                        </data>
+                    </cell>
+                    <cell id="196">
+                        <data id="197">
+                            <property name="resultSetColumn">occurenceOn</property>
+                        </data>
+                    </cell>
+                    <cell id="198">
+                        <data id="199">
+                            <property name="resultSetColumn">incidentNo</property>
+                        </data>
+                    </cell>
+                    <cell id="200">
+                        <data id="201">
+                            <property name="resultSetColumn">incidentType</property>
+                        </data>
+                    </cell>
+                    <cell id="202">
+                        <data id="203">
+                            <property name="resultSetColumn">description</property>
+                        </data>
+                    </cell>
+                </row>
+            </detail>
+            <footer>
+                <row id="204">
+                    <cell id="205"/>
+                    <cell id="206"/>
+                    <cell id="207"/>
+                    <cell id="208"/>
+                    <cell id="209"/>
+                    <cell id="210"/>
+                </row>
+            </footer>
+        </table>
+    </body>
     <list-property name="images">
         <structure>
             <property name="name">sentosa.png</property>
