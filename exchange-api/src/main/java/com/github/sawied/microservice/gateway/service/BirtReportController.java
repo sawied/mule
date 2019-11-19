@@ -1,26 +1,31 @@
 package com.github.sawied.microservice.gateway.service;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.birt.report.engine.api.EngineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.github.sawied.microservice.gateway.report.BirtReportService;
-import com.github.sawied.microservice.gateway.report.OutputType;
-import com.github.sawied.microservice.gateway.report.Report;
+import com.github.sawied.microservice.gateway.birt.BirtReportService;
+import com.github.sawied.microservice.gateway.birt.OutputType;
+import com.github.sawied.microservice.gateway.birt.Report;
+import com.github.sawied.microservice.gateway.birt.ReportRequest;
+import com.github.sawied.microservice.gateway.icase.bean.ICaseResult;
+import com.github.sawied.microservice.gateway.icase.service.ICaseService;
+
 
 
 @Controller
@@ -30,6 +35,9 @@ public class BirtReportController {
 
     @Autowired
     private BirtReportService reportService;
+    
+    @Autowired
+    private ICaseService caseService;
 
     @RequestMapping(produces = "application/json", method = RequestMethod.GET, value = "/report")
     @ResponseBody
@@ -53,9 +61,28 @@ public class BirtReportController {
     @RequestMapping(method = RequestMethod.GET, value = "/report/{name}")
     @ResponseBody
     public void generateFullReport(HttpServletResponse response, HttpServletRequest request,
-                                   @PathVariable("name") String name, @RequestParam("output") String output) {
+                                   @PathVariable("name") String name, @RequestParam("output") String output) throws IOException {
         log.info("Generating full report: " + name + "; format: " + output);
+        
+        if(!Arrays.asList(BirtReportService.REPORT_NAMES).contains(name)){
+        	log.error("no report named {}", name);
+        	throw new IllegalArgumentException("no report named "+ name);
+        }
+        
         OutputType format = OutputType.from(output);
-        reportService.generateMainReport(name, format, response, request);
+        response.setContentType(format.contentType());
+        
+        ReportRequest reportRequest = new ReportRequest();
+        reportRequest.setOutFormart(format);
+        reportRequest.setReportName(name);
+        
+        ICaseResult listCases = caseService.listCases();
+        reportRequest.setResult(listCases);
+    
+        byte[] data =reportService.runReport(reportRequest);
+        
+        FileCopyUtils.copy(data, response.getOutputStream());
     }
+    
+ 
 }

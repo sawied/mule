@@ -30,13 +30,11 @@
 			<version>2.0</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.eclipse.birt.runtime/org.eclipse.birt.runtime -->
 		<dependency>
-			<groupId>org.eclipse.birt.runtime</groupId>
-			<artifactId>org.eclipse.birt.runtime</artifactId>
-			<version>4.4.1</version>
-		</dependency>
-
+    <groupId>com.innoventsolutions.birt.runtime</groupId>
+    <artifactId>org.eclipse.birt.runtime_4.8.0-20180626</artifactId>
+    <version>4.8.0</version>
+</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -5,20 +5,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.assertj.core.util.Lists;
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.core.framework.Platform;
 import org.eclipse.birt.report.engine.api.EXCELRenderOption;
 import org.eclipse.birt.report.engine.api.EngineConfig;
-import org.eclipse.birt.report.engine.api.EngineConstants;
 import org.eclipse.birt.report.engine.api.EngineException;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IGetParameterDefinitionTask;
@@ -38,20 +35,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import com.github.sawied.microservice.gateway.report.OutputType;
-import com.github.sawied.microservice.gateway.report.Report;
 
 @Service
 @Qualifier("birt")
-public class ReportRunnerImpl implements ReportRunner,DisposableBean{
+public class BirtReportServiceImpl implements BirtReportService,DisposableBean{
 	
-	private Logger logger = LoggerFactory.getLogger(ReportRunnerImpl.class);
+	private static final String REPORT_RESULT = "ds";
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(BirtReportServiceImpl.class);
 
 	private IReportEngine birtReportEngine = null;
 	
 	private Map<String, IReportRunnable> reports = new HashMap<>();
-	
-	private static final String[] REPORT_NAMES = new String[]{"case_report"};
 	
 	private static final String reportRoot="reports";
 	
@@ -62,53 +57,42 @@ public class ReportRunnerImpl implements ReportRunner,DisposableBean{
 	@Override
 	public byte[] runReport(ReportRequest request) {
 		
-		OutputStream outputStream = new ByteArrayOutputStream();
-		
+		LOGGER.info("accept report request {}" , request);
+		LOGGER.info("returned response {}",request.getResult());
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		String reportName = request.getReportName();
 		OutputType outFormart = request.getOutFormart();
 		switch (outFormart) {
 		case HTML:
-			generateHTMLReport(reports.get(reportName),outputStream);
+			generateHTMLReport(reports.get(reportName),request,outputStream);
 			break;
 		case PDF:
-			generatePDFReport(reports.get(reportName),outputStream);
+			generatePDFReport(reports.get(reportName),request,outputStream);
 			break;
 		case XLS:
-			//generateXLSReport(reports.get(reportName), response, request);
-			//break;
+			generateXLSReport(reports.get(reportName),request,outputStream);
+			break;
 		default:
 			throw new IllegalArgumentException("Output type not recognized:" + outFormart);
 		}
-		String reportName = request.getReportName();
-		IReportRunnable iReportRunnable = reports.get(reportName);
-		IRunAndRenderTask runAndRenderTask = birtReportEngine.createRunAndRenderTask(iReportRunnable);
-		runAndRenderTask.getAppContext().put("reportResult", request.getResult());
-		return null;
+
+		return outputStream.toByteArray();
 	}
 	
-	public void generateMainReport(String reportName, OutputType output, HttpServletResponse response,
-			HttpServletRequest request) {
-	
-	}
 
 	/**
 	 * Generate a report as HTML
 	 */
-	@SuppressWarnings("unchecked")
-	private void generateHTMLReport(IReportRunnable report,OutputStream outputStream) {
-		IRunAndRenderTask runAndRenderTask = birtEngine.createRunAndRenderTask(report);
-		response.setContentType(birtEngine.getMIMEType("html"));
+	private void generateHTMLReport(IReportRunnable report,ReportRequest request,OutputStream outputStream) {
+		IRunAndRenderTask runAndRenderTask = birtReportEngine.createRunAndRenderTask(report);
 		IRenderOption options = new RenderOption();
 		HTMLRenderOption htmlOptions = new HTMLRenderOption(options);
 		htmlOptions.setOutputFormat("html");
-		htmlOptions.setBaseImageURL("/" + reportsPath + imagesPath);
-		htmlOptions.setImageDirectory(imageFolder);
-		htmlOptions.setImageHandler(htmlImageHandler);
-		runAndRenderTask.setRenderOption(htmlOptions);
-		runAndRenderTask.getAppContext().put(EngineConstants.APPCONTEXT_BIRT_VIEWER_HTTPSERVET_REQUEST, request);
-
+		Map<String,Object> appContext = new HashMap<String,Object>();
+		appContext.put(REPORT_RESULT, request.getResult());
+		runAndRenderTask.setAppContext(appContext);
 		try {
-			htmlOptions.setOutputStream(response.getOutputStream());
+			htmlOptions.setOutputStream(outputStream);
 			runAndRenderTask.run();
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
@@ -120,18 +104,17 @@ public class ReportRunnerImpl implements ReportRunner,DisposableBean{
 	/**
 	 * Generate a report as PDF
 	 */
-	@SuppressWarnings("unchecked")
-	private void generatePDFReport(IReportRunnable report, HttpServletResponse response, HttpServletRequest request) {
-		IRunAndRenderTask runAndRenderTask = birtEngine.createRunAndRenderTask(report);
-		response.setContentType(birtEngine.getMIMEType("pdf"));
+	private void generatePDFReport(IReportRunnable report,ReportRequest request,OutputStream outputStream) {
+		IRunAndRenderTask runAndRenderTask = birtReportEngine.createRunAndRenderTask(report);
 		IRenderOption options = new RenderOption();
 		PDFRenderOption pdfRenderOption = new PDFRenderOption(options);
 		pdfRenderOption.setOutputFormat("pdf");
 		runAndRenderTask.setRenderOption(pdfRenderOption);
-		runAndRenderTask.getAppContext().put(EngineConstants.APPCONTEXT_PDF_RENDER_CONTEXT, request);
-
+		Map<String,Object> appContext = new HashMap<String,Object>();
+		appContext.put(REPORT_RESULT, request.getResult());
+		runAndRenderTask.setAppContext(appContext);
 		try {
-			pdfRenderOption.setOutputStream(response.getOutputStream());
+			pdfRenderOption.setOutputStream(outputStream);
 			runAndRenderTask.run();
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
@@ -142,20 +125,20 @@ public class ReportRunnerImpl implements ReportRunner,DisposableBean{
 	
 	
 	/**
-	 * Generate a report as PDF
+	 * Generate a report as xls
+	 * Content-Type : application/vnd.ms-excel
 	 */
-	@SuppressWarnings("unchecked")
-	private void generateXLSReport(IReportRunnable report, HttpServletResponse response, HttpServletRequest request) {
-		IRunAndRenderTask runAndRenderTask = birtEngine.createRunAndRenderTask(report);
-		response.setContentType(birtEngine.getMIMEType("pdf"));
+	private void generateXLSReport(IReportRunnable report, ReportRequest request,OutputStream outputStream) {
+		IRunAndRenderTask runAndRenderTask = birtReportEngine.createRunAndRenderTask(report);
 		IRenderOption options = new RenderOption();
 		EXCELRenderOption xlsRenderOption = new EXCELRenderOption(options);
 		xlsRenderOption.setOutputFormat("xlsx");
 		runAndRenderTask.setRenderOption(xlsRenderOption);
-		//runAndRenderTask.getAppContext().put(EngineConstants., request);
-
+		Map<String,Object> appContext = new HashMap<String,Object>();
+		appContext.put(REPORT_RESULT, request.getResult());
+		runAndRenderTask.setAppContext(appContext);
 		try {
-			xlsRenderOption.setOutputStream(response.getOutputStream());
+			xlsRenderOption.setOutputStream(outputStream);
 			runAndRenderTask.run();
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
@@ -163,6 +146,8 @@ public class ReportRunnerImpl implements ReportRunner,DisposableBean{
 			runAndRenderTask.close();
 		}
 	}
+	
+	
 	
 	@PostConstruct
 	public void startUp(){
@@ -172,13 +157,13 @@ public class ReportRunnerImpl implements ReportRunner,DisposableBean{
 			Platform.startup(engineConfig);
 			IReportEngineFactory reportEngineFactory = (IReportEngineFactory) Platform.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);
 			birtReportEngine = reportEngineFactory.createReportEngine(engineConfig);
-			
-		} catch (BirtException e) {
+			loadReports();
+		} catch (BirtException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	
+	@Override
 	public List<Report> getReports() {
 		List<Report> response = new ArrayList<>();
 		for (Map.Entry<String, IReportRunnable> entry : reports.entrySet()) {
@@ -202,7 +187,7 @@ public class ReportRunnerImpl implements ReportRunner,DisposableBean{
 	 */
 	public void loadReports() throws EngineException, IOException {
 	
-		ArrayList<String> reportNameList = Lists.list(REPORT_NAMES);
+		List<String> reportNameList = Arrays.asList(REPORT_NAMES);
 		for(String reportName : reportNameList ){
 			ClassPathResource classPathResource = new ClassPathResource(reportRoot+"/"+reportName+"."+"rptdesign");
 			File file = classPathResource.getFile();

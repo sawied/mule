@@ -1,4 +1,4 @@
-package com.github.sawied.microservice.gateway.report;
+package com.github.sawied.microservice.gateway.birt;
 
 import java.util.List;
 

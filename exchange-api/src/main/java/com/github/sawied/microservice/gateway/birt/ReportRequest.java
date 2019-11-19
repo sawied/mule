@@ -1,7 +1,5 @@
 package com.github.sawied.microservice.gateway.birt;
 
-import com.github.sawied.microservice.gateway.report.OutputType;
-
 /**
  * 
  * @author danan
@@ -49,7 +47,12 @@ public class ReportRequest {
 	public void setOutFormart(OutputType outFormart) {
 		this.outFormart = outFormart;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "ReportRequest [reportName=" + reportName + ", reportParams=" + reportParams + ", outFormart="
+				+ outFormart + "]";
+	}
+
 
 }
