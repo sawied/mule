@@ -160,8 +160,8 @@ return false;
     </data-sets>
     <styles>
         <style name="margin" id="96">
-            <property name="marginTop">0.5in</property>
-            <property name="marginBottom">0.5pt</property>
+            <property name="marginTop">0.2in</property>
+            <property name="marginBottom">0.2in</property>
         </style>
         <style name="table-border" id="97">
             <property name="borderBottomStyle">solid</property>
@@ -257,7 +257,6 @@ Resorts World at Sentosa
     </page-setup>
     <body>
         <text id="159">
-            <property name="style">margin</property>
             <property name="contentType">html</property>
             <text-property name="content"><![CDATA[<B>
 <FONT size="4">
@@ -266,6 +265,7 @@ Resorts World at Sentosa
 </B>]]></text-property>
         </text>
         <grid id="160">
+            <property name="style">margin</property>
             <property name="width">7.947916666666667in</property>
             <column id="161">
                 <property name="width">2in</property>
@@ -355,6 +355,19 @@ Filter Summary:
                     <expression name="expression" type="javascript">dataSetRow["description"]</expression>
                     <property name="dataType">string</property>
                 </structure>
+                <structure>
+                    <property name="name">Aggregation</property>
+                    <text-property name="displayName">Total</text-property>
+                    <property name="dataType">integer</property>
+                    <property name="aggregateFunction">COUNT</property>
+                    <list-property name="arguments">
+                        <structure>
+                            <property name="name">Expression</property>
+                            <expression name="value" type="javascript">1</expression>
+                        </structure>
+                    </list-property>
+                    <property name="allowExport">true</property>
+                </structure>
             </list-property>
             <column id="211"/>
             <column id="212"/>
@@ -364,38 +377,89 @@ Filter Summary:
             <column id="216"/>
             <header>
                 <row id="178">
+                    <property name="backgroundColor">#800000</property>
                     <cell id="179">
                         <label id="180">
+                            <property name="fontWeight">bold</property>
+                            <property name="color">white</property>
+                            <property name="textAlign">left</property>
                             <text-property name="text">PARK</text-property>
                         </label>
                     </cell>
                     <cell id="181">
                         <label id="182">
+                            <property name="fontWeight">bold</property>
+                            <property name="color">white</property>
+                            <property name="textAlign">left</property>
                             <text-property name="text">ATTRACTION</text-property>
                         </label>
                     </cell>
                     <cell id="183">
                         <label id="184">
+                            <property name="fontWeight">bold</property>
+                            <property name="color">white</property>
+                            <property name="textAlign">left</property>
                             <text-property name="text">OCCURENCE ON</text-property>
                         </label>
                     </cell>
                     <cell id="185">
                         <label id="186">
+                            <property name="fontWeight">bold</property>
+                            <property name="color">white</property>
+                            <property name="textAlign">left</property>
                             <text-property name="text">INCIDENT NO.</text-property>
                         </label>
                     </cell>
                     <cell id="187">
                         <label id="188">
+                            <property name="fontWeight">bold</property>
+                            <property name="color">white</property>
+                            <property name="textAlign">left</property>
                             <text-property name="text">INCIDENT TYPE</text-property>
                         </label>
                     </cell>
                     <cell id="189">
                         <label id="190">
+                            <property name="fontWeight">bold</property>
+                            <property name="color">white</property>
+                            <property name="textAlign">left</property>
                             <text-property name="text">BRIEF DESCRIPTION</text-property>
                         </label>
                     </cell>
                 </row>
             </header>
+            <group id="219">
+                <property name="groupName">subgroup</property>
+                <expression name="keyExpr" type="javascript">row["park"]</expression>
+                <structure name="toc">
+                    <expression name="expressionValue" type="javascript">row["park"]</expression>
+                </structure>
+                <property name="hideDetail">false</property>
+                <header>
+                    <row id="220">
+                        <cell id="221">
+                            <data id="234">
+                                <property name="resultSetColumn">park</property>
+                            </data>
+                        </cell>
+                        <cell id="222"/>
+                        <cell id="223"/>
+                        <cell id="224"/>
+                        <cell id="225"/>
+                        <cell id="226"/>
+                    </row>
+                </header>
+                <footer>
+                    <row id="227">
+                        <cell id="228"/>
+                        <cell id="229"/>
+                        <cell id="230"/>
+                        <cell id="231"/>
+                        <cell id="232"/>
+                        <cell id="233"/>
+                    </row>
+                </footer>
+            </group>
             <detail>
                 <row id="191">
                     <cell id="192">
@@ -432,12 +496,25 @@ Filter Summary:
             </detail>
             <footer>
                 <row id="204">
-                    <cell id="205"/>
-                    <cell id="206"/>
-                    <cell id="207"/>
-                    <cell id="208"/>
-                    <cell id="209"/>
-                    <cell id="210"/>
+                    <cell id="205">
+                        <property name="colSpan">3</property>
+                        <property name="rowSpan">1</property>
+                        <text id="218">
+                            <property name="display">inline</property>
+                            <property name="contentType">html</property>
+                            <text-property name="content"><![CDATA[<B>
+Total:
+</B>]]></text-property>
+                        </text>
+                        <data id="217">
+                            <property name="display">inline</property>
+                            <property name="resultSetColumn">Aggregation</property>
+                        </data>
+                    </cell>
+                    <cell id="208">
+                        <property name="colSpan">3</property>
+                        <property name="rowSpan">1</property>
+                    </cell>
                 </row>
             </footer>
         </table>
