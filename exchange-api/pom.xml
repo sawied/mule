@@ -51,5 +51,19 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<distributionManagement>
+	
+		<repository>
+			<id>github</id>
+			<name>github Release Repository</name>
+			<url>https://maven.pkg.github.com/sawied/</url>
+		</repository>
+		<snapshotRepository>
+			<id>github</id>
+			<name>github Snapshot Repository</name>
+			<url>https://maven.pkg.github.com/sawied/</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 </project>

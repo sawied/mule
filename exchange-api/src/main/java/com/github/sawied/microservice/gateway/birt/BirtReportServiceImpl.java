@@ -3,6 +3,7 @@ package com.github.sawied.microservice.gateway.birt;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -190,11 +191,13 @@ public class BirtReportServiceImpl implements BirtReportService,DisposableBean{
 		List<String> reportNameList = Arrays.asList(REPORT_NAMES);
 		for(String reportName : reportNameList ){
 			ClassPathResource classPathResource = new ClassPathResource(reportRoot+"/"+reportName+"."+"rptdesign");
-			File file = classPathResource.getFile();
-			reports.put(file.getName().replace(".rptdesign", ""),
-					birtReportEngine.openReportDesign(file.getAbsolutePath()));
+			if(classPathResource.exists()){
+				InputStream inputStream = classPathResource.getInputStream();
+				reports.put(reportName,
+						birtReportEngine.openReportDesign(inputStream));
+				inputStream.close();
+			}
 		}
-
 	}
 	
 	private Report.ParameterType getParameterType(IParameterDefn param) {
