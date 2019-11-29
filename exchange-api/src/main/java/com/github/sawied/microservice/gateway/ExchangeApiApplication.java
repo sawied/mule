@@ -50,7 +50,7 @@ public class ExchangeApiApplication implements WebMvcConfigurer {
 		ExchangeCredentials credentials = new WebCredentials(mailAddress, mailPassword);
 		service.setCredentials(credentials);
 		service.setUrl(new URI(url));
-
+		service.setUserAgent("CXM_CASE_EWS");
 		service.setTraceListener(new MailTraceListener());
 		service.setTraceEnabled(true);
 
