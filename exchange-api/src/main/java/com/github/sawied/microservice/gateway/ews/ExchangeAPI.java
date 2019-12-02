@@ -16,6 +16,7 @@ import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFo
 import microsoft.exchange.webservices.data.core.enumeration.search.SortDirection;
 import microsoft.exchange.webservices.data.core.enumeration.service.ConflictResolutionMode;
 import microsoft.exchange.webservices.data.core.enumeration.service.MessageDisposition;
+import microsoft.exchange.webservices.data.core.service.folder.Folder;
 import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
 import microsoft.exchange.webservices.data.core.service.item.Item;
 import microsoft.exchange.webservices.data.core.service.schema.ItemSchema;
@@ -66,11 +67,12 @@ public class ExchangeAPI {
 			
 			ItemView view = new ItemView(10);
 			FindItemsResults<Item> findResults;
+			Folder folder=Folder.bind(service, WellKnownFolderName.Inbox);
 			ExtendedPropertyDefinition cmProperty = new ExtendedPropertyDefinition(CASE_UUID,MAIL_RETRIEVED, MapiPropertyType.Integer);
 			view.getOrderBy().add(ItemSchema.DateTimeReceived, SortDirection.Descending);
 			view.setPropertySet(new PropertySet(BasePropertySet.IdOnly, cmProperty,ItemSchema.Subject, ItemSchema.DateTimeReceived));
 			
-				findResults = service.findItems(WellKnownFolderName.Inbox,view);
+				findResults = service.findItems(folder.getId(),view);
 				LOG.info("get_mail_list: {}" , findResults.getTotalCount());
 				if(findResults.getTotalCount()==0) {
 					return null;
