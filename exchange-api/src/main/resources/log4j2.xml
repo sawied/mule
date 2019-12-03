@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="error" monitorInterval="30">
+    <Properties>
+        <Property name="contextName">microservice-application-web</Property>
+        <Property name="level" value="error" />
+    </Properties>
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d ${contextName} [%thread] %-5level %logger{36} - %msg%n" />
+        </Console>
+        <RollingFile name="RollingFileInfo" fileName="logs/${contextName}.txt"
+            filePattern="logs/${contextName}-%d{yyyy-MM-dd}-%i.txt">
+            <PatternLayout pattern="%d ${contextName} [%thread] %-5level %logger{36} - %msg%n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="100">
+                <Delete basePath="logs" maxDepth="1">
+                    <IfFileName glob="${contextName}-*.txt">
+                        <IfLastModified age="2m">
+                            <IfAny>
+                                <IfAccumulatedFileSize exceeds="1GB" />
+                                <IfAccumulatedFileCount exceeds="100" />
+                            </IfAny>
+                        </IfLastModified>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <Async name="Async">
+            <AppenderRef ref="RollingFileInfo" />
+        </Async>
+    </Appenders>
+    <Loggers>
+
+        <logger name="org.springframework.security" level="debug" />
+         <logger name="com.github.sawied" level="debug" />
+         <logger name="org.apache" level="debug" />
+        
+        <Root level="DEBUG">
+            <appender-ref ref="STDOUT" />
+        </Root>
+    </Loggers>
+</Configuration>
