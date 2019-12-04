@@ -23,8 +23,8 @@ import com.github.sawied.microservice.gateway.birt.BirtReportService;
 import com.github.sawied.microservice.gateway.birt.OutputType;
 import com.github.sawied.microservice.gateway.birt.Report;
 import com.github.sawied.microservice.gateway.birt.ReportRequest;
-import com.github.sawied.microservice.gateway.icase.bean.ICaseResult;
 import com.github.sawied.microservice.gateway.icase.service.ICaseService;
+import com.github.sawied.microservice.gateway.report.incident.ICaseResult;
 
 
 
@@ -72,14 +72,14 @@ public class BirtReportController {
         OutputType format = OutputType.from(output);
         response.setContentType(format.contentType());
         
-        ReportRequest reportRequest = new ReportRequest();
-        reportRequest.setOutFormart(format);
-        reportRequest.setReportName(name);
-        
+       /*******core code********/
         ICaseResult listCases = caseService.listCases();
-        reportRequest.setResult(listCases);
+        
+        
+        ReportRequest<ICaseResult> reportRequest = new ReportRequest<ICaseResult>(name,format,listCases);
     
         byte[] data =reportService.runReport(reportRequest);
+  
         
         FileCopyUtils.copy(data, response.getOutputStream());
     }

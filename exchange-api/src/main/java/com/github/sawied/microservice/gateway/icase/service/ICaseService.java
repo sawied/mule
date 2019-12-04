@@ -2,8 +2,8 @@ package com.github.sawied.microservice.gateway.icase.service;
 
 import java.util.Date;
 
-import com.github.sawied.microservice.gateway.icase.bean.ICase;
-import com.github.sawied.microservice.gateway.icase.bean.ICaseResult;
+import com.github.sawied.microservice.gateway.report.incident.ICase;
+import com.github.sawied.microservice.gateway.report.incident.ICaseResult;
 
 public class ICaseService {
 	

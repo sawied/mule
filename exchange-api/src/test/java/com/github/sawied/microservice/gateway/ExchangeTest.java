@@ -13,14 +13,15 @@ import com.github.sawied.microservice.gateway.ews.ExchangeAPI;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+@SpringBootTest(
+		properties={"logging.level.org.apache.http.wire=debug "})
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ExchangeTest {
 
 	@Autowired
 	private ExchangeAPI exchangeApi;
 	
-	@Test
+	//@Test
 	public void aSendMailSuccess() throws InterruptedException {
 		exchangeApi.sendMessage();
 	}
@@ -31,7 +32,7 @@ public class ExchangeTest {
 	}
 	@Test
 	public void cretrieveMarkedMailSuccess() throws InterruptedException {
-		//exchangeApi.retrieveMarkedMailList();
+		exchangeApi.retrieveMarkedMailList();
 	}
 	
 

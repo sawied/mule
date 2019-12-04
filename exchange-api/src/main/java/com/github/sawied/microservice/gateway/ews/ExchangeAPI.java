@@ -24,6 +24,7 @@ import microsoft.exchange.webservices.data.property.complex.AttachmentCollection
 import microsoft.exchange.webservices.data.property.complex.ExtendedProperty;
 import microsoft.exchange.webservices.data.property.complex.ExtendedPropertyCollection;
 import microsoft.exchange.webservices.data.property.complex.FolderId;
+import microsoft.exchange.webservices.data.property.complex.Mailbox;
 import microsoft.exchange.webservices.data.property.complex.MessageBody;
 import microsoft.exchange.webservices.data.property.definition.ExtendedPropertyDefinition;
 import microsoft.exchange.webservices.data.search.FindItemsResults;
@@ -148,7 +149,7 @@ public class ExchangeAPI {
 			
 			//new SearchFilter.Not(new ExtendedPropertyDefinition(0x00000003, MapiPropertyType.Integer));
 			   SearchFilter searchFilter = new SearchFilter.IsEqualTo(cmProperty, 1);
-	
+			   
 				findResults = service.findItems(WellKnownFolderName.Inbox,searchFilter, view);
 				service.loadPropertiesForItems(findResults, propertySet);
 				

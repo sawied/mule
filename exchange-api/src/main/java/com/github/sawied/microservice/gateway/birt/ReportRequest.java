@@ -5,22 +5,28 @@ package com.github.sawied.microservice.gateway.birt;
  * @author danan
  *
  */
-public class ReportRequest {
+public class ReportRequest<T> {
 	
 	private String reportName;
 	
-	private Object reportParams;
-	
 	private OutputType outFormart;
 	
-	private Object result;
+	private T result;
 	
-
-	public Object getResult() {
-		return result;
+	
+	
+	public ReportRequest(String reportName, OutputType outFormart, T result) {
+		super();
+		this.reportName = reportName;
+		this.outFormart = outFormart;
+		this.result = result;
 	}
 
-	public void setResult(Object result) {
+	public T getResult() {
+		return result;
+	}
+	
+	public void setResult(T result) {
 		this.result = result;
 	}
 
@@ -32,13 +38,6 @@ public class ReportRequest {
 		this.reportName = reportName;
 	}
 
-	public Object getReportParams() {
-		return reportParams;
-	}
-
-	public void setReportParams(Object reportParams) {
-		this.reportParams = reportParams;
-	}
 
 	public OutputType getOutFormart() {
 		return outFormart;
@@ -50,7 +49,7 @@ public class ReportRequest {
 
 	@Override
 	public String toString() {
-		return "ReportRequest [reportName=" + reportName + ", reportParams=" + reportParams + ", outFormart="
+		return "ReportRequest [reportName=" + reportName + ",  outFormart="
 				+ outFormart + "]";
 	}
 

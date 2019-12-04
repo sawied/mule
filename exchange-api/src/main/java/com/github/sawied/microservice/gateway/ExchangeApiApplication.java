@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.github.sawied.microservice.gateway.ews.CustomExchangeService;
 import com.github.sawied.microservice.gateway.ews.ExchangeAPI;
 import com.github.sawied.microservice.gateway.ews.MailTraceListener;
 import com.github.sawied.microservice.gateway.icase.service.ICaseService;
@@ -46,14 +47,12 @@ public class ExchangeApiApplication implements WebMvcConfigurer {
 	public ExchangeService exchangeService(@Value("${ews.email.address}") String mailAddress,
 			@Value("${ews.email.password}") String mailPassword, @Value("${ews.email.url}") String url)
 			throws Exception {
-		ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2010_SP2);
-		ExchangeCredentials credentials = new WebCredentials(mailAddress, mailPassword);
+		ExchangeService service = new CustomExchangeService(ExchangeVersion.Exchange2010_SP2);
+		ExchangeCredentials credentials = new WebCredentials("stcxmappsvc1", "Rws12345!","RWS-DEV");
 		service.setCredentials(credentials);
 		service.setUrl(new URI(url));
-		service.setUserAgent("CXM_CASE_EWS");
 		service.setTraceListener(new MailTraceListener());
 		service.setTraceEnabled(true);
-
 		return service;
 	}
 
