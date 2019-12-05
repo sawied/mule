@@ -9,7 +9,7 @@ public interface BirtReportService {
 	
 	static final String[] REPORT_NAMES = new String[]{"case_report"};
 	
-	byte[] runReport(ReportRequest request);
+	byte[] runReport(ReportRequest<?> request);
 	
 	List<Report> getReports();
 	

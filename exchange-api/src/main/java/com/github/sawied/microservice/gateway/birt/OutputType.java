@@ -7,13 +7,19 @@ public enum OutputType {
 	HTML(IRenderOption.OUTPUT_FORMAT_HTML),
     PDF(IRenderOption.OUTPUT_FORMAT_PDF),
     XLS("xls"),
+    WORD("docx"),
     INVALID("invalid");
 
     String val;
+    
     OutputType(String val) {
         this.val = val;
     }
 
+    public String val(){
+    	return this.val;
+    }
+    
     public static OutputType from(String text) {
         for (OutputType output : values()) {
             if(output.val.equalsIgnoreCase(text)) return output;
@@ -32,6 +38,9 @@ public enum OutputType {
     	}
     	if(XLS.equals(this)){
     		contentType = "application/vnd.ms-excel";
+    	}
+    	if(WORD.equals(this)){
+    		contentType = "application/vnd.ms-word";
     	}
     	return contentType;
     }

@@ -14,6 +14,7 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.core.framework.Platform;
+import org.eclipse.birt.report.engine.api.DocxRenderOption;
 import org.eclipse.birt.report.engine.api.EXCELRenderOption;
 import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.EngineException;
@@ -55,7 +56,7 @@ public class BirtReportServiceImpl implements BirtReportService,DisposableBean{
 	 * 
 	 */
 	@Override
-	public byte[] runReport(ReportRequest request) {
+	public byte[] runReport(ReportRequest<?> request) {
 		
 		LOGGER.info("accept report request {}" , request);
 		LOGGER.info("returned response {}",request.getResult());
@@ -72,6 +73,9 @@ public class BirtReportServiceImpl implements BirtReportService,DisposableBean{
 		case XLS:
 			generateXLSReport(reports.get(reportName),request,outputStream);
 			break;
+		case WORD:
+			generateWordReport(reports.get(reportName), request, outputStream);
+			break;
 		default:
 			throw new IllegalArgumentException("Output type not recognized:" + outFormart);
 		}
@@ -83,7 +87,7 @@ public class BirtReportServiceImpl implements BirtReportService,DisposableBean{
 	/**
 	 * Generate a report as HTML
 	 */
-	private void generateHTMLReport(IReportRunnable report,ReportRequest request,OutputStream outputStream) {
+	private void generateHTMLReport(IReportRunnable report,ReportRequest<?> request,OutputStream outputStream) {
 		IRunAndRenderTask runAndRenderTask = birtReportEngine.createRunAndRenderTask(report);
 		IRenderOption options = new RenderOption();
 		HTMLRenderOption htmlOptions = new HTMLRenderOption(options);
@@ -104,7 +108,7 @@ public class BirtReportServiceImpl implements BirtReportService,DisposableBean{
 	/**
 	 * Generate a report as PDF
 	 */
-	private void generatePDFReport(IReportRunnable report,ReportRequest request,OutputStream outputStream) {
+	private void generatePDFReport(IReportRunnable report,ReportRequest<?> request,OutputStream outputStream) {
 		IRunAndRenderTask runAndRenderTask = birtReportEngine.createRunAndRenderTask(report);
 		IRenderOption options = new RenderOption();
 		PDFRenderOption pdfRenderOption = new PDFRenderOption(options);
@@ -128,11 +132,34 @@ public class BirtReportServiceImpl implements BirtReportService,DisposableBean{
 	 * Generate a report as xls
 	 * Content-Type : application/vnd.ms-excel
 	 */
-	private void generateXLSReport(IReportRunnable report, ReportRequest request,OutputStream outputStream) {
+	private void generateXLSReport(IReportRunnable report, ReportRequest<?> request,OutputStream outputStream) {
 		IRunAndRenderTask runAndRenderTask = birtReportEngine.createRunAndRenderTask(report);
 		IRenderOption options = new RenderOption();
 		EXCELRenderOption xlsRenderOption = new EXCELRenderOption(options);
 		xlsRenderOption.setOutputFormat("xlsx");
+		runAndRenderTask.setRenderOption(xlsRenderOption);
+		Map<String,Object> appContext = new HashMap<String,Object>();
+		appContext.put(REPORT_RESULT, request.getResult());
+		runAndRenderTask.setAppContext(appContext);
+		try {
+			xlsRenderOption.setOutputStream(outputStream);
+			runAndRenderTask.run();
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		} finally {
+			runAndRenderTask.close();
+		}
+	}
+	
+	
+	/**
+	 * Generate a report as word
+	 * Content-Type : application/vnd.ms-excel
+	 */
+	private void generateWordReport(IReportRunnable report, ReportRequest<?> request,OutputStream outputStream) {
+		IRunAndRenderTask runAndRenderTask = birtReportEngine.createRunAndRenderTask(report);
+		DocxRenderOption xlsRenderOption = new DocxRenderOption();
+		xlsRenderOption.setOutputFormat("docx");
 		runAndRenderTask.setRenderOption(xlsRenderOption);
 		Map<String,Object> appContext = new HashMap<String,Object>();
 		appContext.put(REPORT_RESULT, request.getResult());

@@ -1,7 +1,9 @@
 package com.github.sawied.microservice.gateway.service;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +12,7 @@ import org.eclipse.birt.report.engine.api.EngineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -70,7 +73,15 @@ public class BirtReportController {
         }
         
         OutputType format = OutputType.from(output);
-        response.setContentType(format.contentType());
+     
+        String downloadName = this.getDownloadName(name,format);
+        
+        response.addHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+downloadName+"\"");
+        
+        
+        
+        
+        
         
        /*******core code********/
         ICaseResult listCases = caseService.listCases();
@@ -82,6 +93,17 @@ public class BirtReportController {
   
         
         FileCopyUtils.copy(data, response.getOutputStream());
+    }
+    
+    private String getDownloadName(String name ,OutputType format){
+    	StringBuffer stringBuffer = new StringBuffer(name);
+    	stringBuffer.append("_");
+    	SimpleDateFormat dateFormart=new SimpleDateFormat("yyyyMMddhhmm");
+        String time = dateFormart.format(new Date());	
+    	stringBuffer.append(time);
+    	stringBuffer.append(".");
+    	stringBuffer.append(format.val());
+         return stringBuffer.toString();
     }
     
  
