@@ -16,7 +16,7 @@ public class EwsController {
 	
 	@RequestMapping("/mails")
 	public @ResponseBody String retrieveMail() {
-		exchangeApi.mailList();
+		exchangeApi.syncEWSMessage();
 		return "SUCCESS";
 	}
 	

@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.github.sawied.microservice.gateway.ews.ExchangeAPI;
+import com.github.sawied.microservice.gateway.ews.ExchangeExCeption;
 
 
 
@@ -22,17 +23,13 @@ public class ExchangeTest {
 	private ExchangeAPI exchangeApi;
 	
 	//@Test
-	public void aSendMailSuccess() throws InterruptedException {
+	public void aSendMailSuccess() throws InterruptedException, ExchangeExCeption {
 		exchangeApi.sendMessage();
 	}
 	
 	@Test
-	public void bMarkMailListSuccess() throws InterruptedException {
-		//exchangeApi.markMailList();
-	}
-	@Test
 	public void cretrieveMarkedMailSuccess() throws InterruptedException {
-		exchangeApi.retrieveMarkedMailList();
+		exchangeApi.syncEWSMessage();
 	}
 	
 

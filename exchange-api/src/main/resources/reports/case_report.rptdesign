@@ -409,7 +409,14 @@ Filter Summary:
                 </structure>
             </list-property>
             <column id="211"/>
-            <column id="212"/>
+            <column id="212">
+                <list-property name="visibility">
+                    <structure>
+                        <property name="format">all</property>
+                        <expression name="valueExpr" type="javascript">true</expression>
+                    </structure>
+                </list-property>
+            </column>
             <column id="213"/>
             <column id="214"/>
             <column id="215"/>

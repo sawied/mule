@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfigurat
 import org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.github.sawied.microservice.gateway.ews.CustomExchangeService;
@@ -27,34 +26,23 @@ import microsoft.exchange.webservices.data.credential.WebCredentials;
 @EnableAutoConfiguration(exclude={MongoAutoConfiguration.class, MongoRepositoriesAutoConfiguration .class,MongoDataAutoConfiguration.class})
 public class ExchangeApiApplication implements WebMvcConfigurer {
 
-	@Value("${reports.relative.path}")
-	private String reportsPath;
-
-	@Value("${images.relative.path}")
-	private String imagesPath;
-
 	public static void main(String[] args) {
 		SpringApplication.run(ExchangeApiApplication.class, args);
 	}
 
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler(reportsPath + imagesPath + "/**")
-				.addResourceLocations("file:///" + System.getProperty("user.dir") + "/" + reportsPath + imagesPath);
-	}
-
-	@Bean(destroyMethod = "close")
-	public ExchangeService exchangeService(@Value("${ews.email.address}") String mailAddress,
+	@Bean(name="exchangeService",destroyMethod = "close")
+	public ExchangeService exchangeService(@Value("${ews.email.account}") String emailAccount,
 			@Value("${ews.email.password}") String mailPassword, @Value("${ews.email.url}") String url)
 			throws Exception {
 		ExchangeService service = new CustomExchangeService(ExchangeVersion.Exchange2010_SP2);
-		ExchangeCredentials credentials = new WebCredentials("stcxmappsvc1", "Rws12345!","RWS-DEV");
+		ExchangeCredentials credentials = new WebCredentials(emailAccount,mailPassword);
 		service.setCredentials(credentials);
 		service.setUrl(new URI(url));
 		service.setTraceListener(new MailTraceListener());
 		service.setTraceEnabled(true);
 		return service;
 	}
+	
 
 	@Bean
 	public ExchangeAPI exchengAPI() {
