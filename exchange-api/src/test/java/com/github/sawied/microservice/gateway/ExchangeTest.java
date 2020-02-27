@@ -18,6 +18,8 @@ import com.github.sawied.microservice.gateway.ews.ExchangeExCeption;
 		properties={"logging.level.org.apache.http.wire=debug "})
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ExchangeTest {
+	
+	private static String id = "AQMkADAwATZiZmYAZC1mMGYzLTU1ADllLTAwAi0wMAoARgAAAy3Ssp2iB1BAufsNVQNIiX8HAIC8gItBA1xEg5S2jNHnPAEAAAIBDAAAAIC8gItBA1xEg5S2jNHnPAEAA8Vw9GkAAAA=";
 
 	@Autowired
 	private ExchangeAPI exchangeApi;
@@ -28,6 +30,11 @@ public class ExchangeTest {
 	}
 	
 	@Test
+	public void bRelyMailSuccess() throws InterruptedException, ExchangeExCeption {
+		exchangeApi.replyMail(id);
+	}
+	
+    //@Test
 	public void cretrieveMarkedMailSuccess() throws InterruptedException {
 		exchangeApi.syncEWSMessage();
 	}

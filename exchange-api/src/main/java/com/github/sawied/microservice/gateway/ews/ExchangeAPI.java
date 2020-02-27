@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -20,13 +21,12 @@ import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFo
 import microsoft.exchange.webservices.data.core.enumeration.search.SortDirection;
 import microsoft.exchange.webservices.data.core.enumeration.service.ConflictResolutionMode;
 import microsoft.exchange.webservices.data.core.enumeration.service.MessageDisposition;
-import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
 import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
 import microsoft.exchange.webservices.data.core.service.item.Item;
+import microsoft.exchange.webservices.data.core.service.response.ResponseMessage;
 import microsoft.exchange.webservices.data.core.service.schema.ItemSchema;
 import microsoft.exchange.webservices.data.property.complex.FolderId;
 import microsoft.exchange.webservices.data.property.complex.ItemId;
-import microsoft.exchange.webservices.data.property.complex.Mailbox;
 import microsoft.exchange.webservices.data.property.complex.MessageBody;
 import microsoft.exchange.webservices.data.property.definition.ExtendedPropertyDefinition;
 import microsoft.exchange.webservices.data.search.FindItemsResults;
@@ -110,11 +110,11 @@ public class ExchangeAPI implements InitializingBean {
 			boolean moreItems = true;
 			ItemId anchorId = null;
 			
-			final Mailbox mailbox = new Mailbox(mail);
-			FolderId folderId = new FolderId(WellKnownFolderName.Inbox,mailbox);
+			//final Mailbox mailbox = new Mailbox(mail);
+			FolderId folderId = new FolderId(WellKnownFolderName.Inbox);
 			
 			while(moreItems){
-				FindItemsResults<Item> findItems = exchangeService.findItems(folderId, searchFilter,view);
+				FindItemsResults<Item> findItems = exchangeService.findItems(folderId,/** searchFilter,**/ view);
 				moreItems=findItems.isMoreAvailable();
 				if(moreItems && anchorId !=null){
 					if(findItems.getItems().get(0).getId()!=anchorId){
@@ -153,19 +153,21 @@ public class ExchangeAPI implements InitializingBean {
 		
 	}
 	
-	private void printEmailMessage(EmailMessage email) throws ServiceLocalException {
+	private void printEmailMessage(EmailMessage email) throws Exception {
 		
 		String subject = email.getSubject();
+		ItemId itemId = email.getId();
 		String from = email.getFrom().getAddress();
 		Date dateTimeCreated = email.getDateTimeCreated();
 		Date dateTimeReceived = email.getDateTimeReceived();
 		Date dateTimeSent = email.getDateTimeSent();
 		String displayTo = email.getDisplayTo();
 		MessageBody body = email.getBody();
-		body.setBodyType(BodyType.Text);
 		BodyType type=body.getBodyType();
 		
+		String messageBodyString= MessageBody.getStringFromMessageBody(body);
 		
+		String textOnly = Jsoup.parse(messageBodyString).text();
 		//print info 
 		
 		System.out.println("Subject: " + subject);
@@ -176,6 +178,9 @@ public class ExchangeAPI implements InitializingBean {
 		System.out.println("type: " + type);
 		System.out.println("displayTo: " + displayTo);
 		System.out.println("body: " + body.toString());
+		System.out.println("body:" + messageBodyString);
+		System.out.println("text only:" + textOnly);
+		System.out.println("itemId:" + itemId.getUniqueId());
 		
 	}
 
@@ -192,6 +197,23 @@ public class ExchangeAPI implements InitializingBean {
 		}
 		
 		
+	}
+
+
+	public void replyMail(String id) {
+		try {
+			ItemId itemId = ItemId.getItemIdFromString(id);
+			EmailMessage emailMessage = EmailMessage.bind(exchangeService, itemId);
+			ResponseMessage createReply = emailMessage.createReply(true);
+			MessageBody msgBody = new MessageBody("<p>reply message test</p>");
+			msgBody.setBodyType(BodyType.HTML);
+			createReply.setBodyPrefix(msgBody);
+			createReply.sendAndSaveCopy();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+			
 	}
 
 }
