@@ -1,5 +1,7 @@
 package com.github.sawied.microservice.gateway;
 
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,11 +27,16 @@ public class ExchangeTest {
 	private ExchangeAPI exchangeApi;
 	
 	//@Test
+	public void initSuccess() throws InterruptedException {
+		assertNotNull(exchangeApi);
+	}
+	
+	//@Test
 	public void aSendMailSuccess() throws InterruptedException, ExchangeExCeption {
 		exchangeApi.sendMessage();
 	}
 	
-	@Test
+	//@Test
 	public void bRelyMailSuccess() throws InterruptedException, ExchangeExCeption {
 		exchangeApi.replyMail(id);
 	}
@@ -38,6 +45,13 @@ public class ExchangeTest {
 	public void cretrieveMarkedMailSuccess() throws InterruptedException {
 		exchangeApi.syncEWSMessage();
 	}
-	
+    
+	@Test
+    public void timeoutConnectionTest() throws ExchangeExCeption, InterruptedException {
+    	exchangeApi.sendMessage();
+    	 Thread.currentThread().sleep(1000*600);
+    	 exchangeApi.syncEWSMessage();
+    }
+   
 
 }

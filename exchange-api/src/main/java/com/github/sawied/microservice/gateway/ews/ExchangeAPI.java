@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
-import microsoft.exchange.webservices.data.core.ExchangeService;
 import microsoft.exchange.webservices.data.core.PropertySet;
 import microsoft.exchange.webservices.data.core.enumeration.property.BasePropertySet;
 import microsoft.exchange.webservices.data.core.enumeration.property.BodyType;
@@ -44,7 +42,7 @@ public class ExchangeAPI implements InitializingBean {
 	private static int DEFAULT_PAGE_SIZE = 10;
 
 	@Autowired
-	private ExchangeService exchangeService;
+	private CustomExchangeService exchangeService;
 
 
 	
@@ -72,6 +70,7 @@ public class ExchangeAPI implements InitializingBean {
 	
 	public void sendMessage() throws ExchangeExCeption {
 		EmailMessage msg;
+		exchangeService.releaseConnection();
 		try {
 			msg = new EmailMessage(exchangeService);
 			//msg.setFrom(new EmailAddress("noreply@chinasoft.com"));
@@ -93,6 +92,7 @@ public class ExchangeAPI implements InitializingBean {
 	 */
 	public void fetchMail(String mail){
 		LOG.debug("use email box {} to fetch mail list",mail);
+		exchangeService.releaseConnection();
 		//
 		int offsize = 0;
 		
@@ -130,6 +130,9 @@ public class ExchangeAPI implements InitializingBean {
 				int i = findItems.getItems().size();
 				if(i>0){
 					anchorId =findItems.getItems().get(i-1).getId();
+				}else {
+					LOG.info("no mail be fetched.");
+					break;
 				}
 				
 				int displayCount = i > DEFAULT_PAGE_SIZE ? DEFAULT_PAGE_SIZE : i;
@@ -183,6 +186,10 @@ public class ExchangeAPI implements InitializingBean {
 		System.out.println("itemId:" + itemId.getUniqueId());
 		
 	}
+	
+	public void releaseConnection() {
+		this.exchangeService.releaseConnection();
+	}
 
 	
 	@Override
@@ -201,6 +208,7 @@ public class ExchangeAPI implements InitializingBean {
 
 
 	public void replyMail(String id) {
+		exchangeService.releaseConnection();
 		try {
 			ItemId itemId = ItemId.getItemIdFromString(id);
 			EmailMessage emailMessage = EmailMessage.bind(exchangeService, itemId);
