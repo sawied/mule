@@ -41,12 +41,12 @@ public class ExchangeTest {
 		exchangeApi.replyMail(id);
 	}
 	
-    //@Test
+    @Test
 	public void cretrieveMarkedMailSuccess() throws InterruptedException {
 		exchangeApi.syncEWSMessage();
 	}
     
-	@Test
+	//@Test
     public void timeoutConnectionTest() throws ExchangeExCeption, InterruptedException {
     	exchangeApi.sendMessage();
     	 Thread.currentThread().sleep(1000*600);

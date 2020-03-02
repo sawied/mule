@@ -2,8 +2,11 @@ package com.github.sawied.microservice.gateway.ews;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import microsoft.exchange.webservices.data.core.PropertySet;
 import microsoft.exchange.webservices.data.core.enumeration.property.BasePropertySet;
 import microsoft.exchange.webservices.data.core.enumeration.property.BodyType;
+import microsoft.exchange.webservices.data.core.enumeration.property.DefaultExtendedPropertySet;
 import microsoft.exchange.webservices.data.core.enumeration.property.MapiPropertyType;
 import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
 import microsoft.exchange.webservices.data.core.enumeration.search.SortDirection;
@@ -22,11 +26,15 @@ import microsoft.exchange.webservices.data.core.enumeration.service.MessageDispo
 import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
 import microsoft.exchange.webservices.data.core.service.item.Item;
 import microsoft.exchange.webservices.data.core.service.response.ResponseMessage;
+import microsoft.exchange.webservices.data.core.service.schema.EmailMessageSchema;
 import microsoft.exchange.webservices.data.core.service.schema.ItemSchema;
+import microsoft.exchange.webservices.data.property.complex.AttachmentCollection;
 import microsoft.exchange.webservices.data.property.complex.FolderId;
+import microsoft.exchange.webservices.data.property.complex.InternetMessageHeader;
 import microsoft.exchange.webservices.data.property.complex.ItemId;
 import microsoft.exchange.webservices.data.property.complex.MessageBody;
 import microsoft.exchange.webservices.data.property.definition.ExtendedPropertyDefinition;
+import microsoft.exchange.webservices.data.property.definition.PropertyDefinitionBase;
 import microsoft.exchange.webservices.data.search.FindItemsResults;
 import microsoft.exchange.webservices.data.search.ItemView;
 import microsoft.exchange.webservices.data.search.filter.SearchFilter;
@@ -101,7 +109,9 @@ public class ExchangeAPI implements InitializingBean {
 		try{
 			view.getOrderBy().add(ItemSchema.DateTimeReceived, SortDirection.Descending);
 			ExtendedPropertyDefinition extendedPropertyDefinition = new ExtendedPropertyDefinition(CID, MAIL_RETRIEVED,MapiPropertyType.Integer);
-			PropertySet propertySet = new PropertySet(BasePropertySet.FirstClassProperties,extendedPropertyDefinition);
+			ExtendedPropertyDefinition PR_TRANSPORT_MESSAGE_HEADERS = new ExtendedPropertyDefinition(0x007D, MapiPropertyType.String);
+	       
+			PropertySet propertySet = new PropertySet(BasePropertySet.FirstClassProperties,extendedPropertyDefinition,PR_TRANSPORT_MESSAGE_HEADERS);
 			view.setPropertySet(propertySet);
 			
 			//search filter 
@@ -173,6 +183,13 @@ public class ExchangeAPI implements InitializingBean {
 		String textOnly = Jsoup.parse(messageBodyString).text();
 		//print info 
 		
+		String internetMessageId = email.getInternetMessageId();
+		
+		System.out.println("internetMessageId :" + internetMessageId);
+		
+		String references = email.getReferences();
+		System.out.println("references :" + getOrignReference(references));
+		
 		System.out.println("Subject: " + subject);
 		System.out.println("created: " + dateTimeCreated);
 		System.out.println("received: " + dateTimeReceived);
@@ -185,6 +202,24 @@ public class ExchangeAPI implements InitializingBean {
 		System.out.println("text only:" + textOnly);
 		System.out.println("itemId:" + itemId.getUniqueId());
 		
+	}
+	
+	/**
+	 * get reference of first one that represent the orign mail messageId
+	 * @param references
+	 * @return
+	 */
+	public String getOrignReference(String references){
+		String orign = null;
+		if(references!=null) {
+			String removedBlankString  = references.trim();
+			
+			if(removedBlankString.startsWith("<")) {
+				int indexOf = removedBlankString.indexOf(">");
+				orign=removedBlankString.substring(0, indexOf+1);
+			}
+		}
+			return orign;
 	}
 	
 	public void releaseConnection() {
@@ -212,10 +247,17 @@ public class ExchangeAPI implements InitializingBean {
 		try {
 			ItemId itemId = ItemId.getItemIdFromString(id);
 			EmailMessage emailMessage = EmailMessage.bind(exchangeService, itemId);
+	
+			// ExtendedPropertyDefinition xExperimentalHeader = new ExtendedPropertyDefinition(DefaultExtendedPropertySet,"X-Experimental", MapiPropertyType.String);
+			
+			
 			ResponseMessage createReply = emailMessage.createReply(true);
+		
+			
 			MessageBody msgBody = new MessageBody("<p>reply message test</p>");
 			msgBody.setBodyType(BodyType.HTML);
 			createReply.setBodyPrefix(msgBody);
+			
 			createReply.sendAndSaveCopy();
 		} catch (Exception e) {
 			e.printStackTrace();
