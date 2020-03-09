@@ -248,17 +248,16 @@ public class ExchangeAPI implements InitializingBean {
 			ItemId itemId = ItemId.getItemIdFromString(id);
 			EmailMessage emailMessage = EmailMessage.bind(exchangeService, itemId);
 	
-			// ExtendedPropertyDefinition xExperimentalHeader = new ExtendedPropertyDefinition(DefaultExtendedPropertySet,"X-Experimental", MapiPropertyType.String);
-			
-			
+			// ExtendedPropertyDefinition xExperimentalHeader = new ExtendedPropertyDefinition(DefaultExtendedPropertySet,"X-Experimental", MapiPropertyType.String);	
 			ResponseMessage createReply = emailMessage.createReply(true);
 		
-			
 			MessageBody msgBody = new MessageBody("<p>reply message test</p>");
 			msgBody.setBodyType(BodyType.HTML);
 			createReply.setBodyPrefix(msgBody);
+			final EmailMessage saveMessage = createReply.save();
+			saveMessage.getAttachments().addFileAttachment("hello.txt","Hello world".getBytes());
+			saveMessage.sendAndSaveCopy();
 			
-			createReply.sendAndSaveCopy();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
