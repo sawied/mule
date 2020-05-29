@@ -17,7 +17,7 @@ import com.github.sawied.microservice.gateway.ews.ExchangeExCeption;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(
-		properties={"logging.level.org.apache.http.wire=debug "})
+		properties={"logging.level.org.apache.http.wire=error "})
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ExchangeTest {
 	
@@ -36,15 +36,20 @@ public class ExchangeTest {
 		exchangeApi.sendMessage();
 	}
 	
-	@Test
+	//@Test
 	public void bRelyMailSuccess() throws InterruptedException, ExchangeExCeption {
 		exchangeApi.replyMail(id);
 	}
 	
-    //@Test
+    @Test
 	public void cretrieveMarkedMailSuccess() throws InterruptedException {
 		exchangeApi.syncEWSMessage();
 	}
+    
+    //@Test
+    public void printEmailInfo() {
+    	exchangeApi.printEmailinfoByItemId("AAMkAGU5NmUzMTdmLWUzYWQtNDVkMy05Mzk2LTU2ZGRhNGVkMDQyMQBGAAAAAADj1dRS2gDgT51SsO6oqriXBwCqhal+jPehToL8F9r3nSTkAAAAAAEMAACqhal+jPehToL8F9r3nSTkAABcH51gAAA=");
+    }
     
 	//@Test
     public void timeoutConnectionTest() throws ExchangeExCeption, InterruptedException {

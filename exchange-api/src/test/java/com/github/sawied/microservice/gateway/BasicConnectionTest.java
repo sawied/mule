@@ -1,8 +1,14 @@
 package com.github.sawied.microservice.gateway;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import java.io.IOException;
+
+import org.apache.commons.io.FilenameUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.FileCopyUtils;
 
 public class BasicConnectionTest {
 	
@@ -21,5 +27,22 @@ public class BasicConnectionTest {
 		}
 		System.out.println(orign);
 	}
+	
+	@Test
+	public void plainText() throws IOException{
+		
+		final ClassPathResource classPathResource = new ClassPathResource("test.html");
+		byte[] bytes=FileCopyUtils.copyToByteArray(classPathResource.getInputStream());
+		Document document = Jsoup.parse(new String(bytes,"UTF-8"));
+		document.outputSettings().prettyPrint(true);
+		String output=document.wholeText().trim() ;
+		System.out.println(output);
+	}
 
+	
+	@Test
+	public void fileExtension() throws IOException{
+		
+	 System.out.println(FilenameUtils.getExtension("RE:RE 3 Test 030320"));
+	}
 }

@@ -24,7 +24,7 @@ public class CustomExchangeService extends ExchangeService{
 		super(exchange2010Sp2);
 		super.setCustomUserAgent(CASE_MANAGEMENT_EWS);
 		customHttpClient();
-		this.getHttpHeaders().put("Authorization", "Basic ZGFuYW4uMjAwOUBob3RtYWlsLmNvbTowMzExNzExdw==");
+		this.getHttpHeaders().put("Authorization", "Basic bWFpbGFkZHJlc3NAaG9zdC5jb206cGFzc3dvcmQ=");
 	}
 	
 	

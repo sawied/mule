@@ -12,7 +12,7 @@ public class MailTraceListener implements ITraceListener{
 	@Override
 	public void trace(String traceType, String traceMessage) {
 		LOG.debug("trace Type  ---------{}", traceType);
-		LOG.debug("trace message:  {} : ---------", traceMessage);
+		//LOG.debug("trace message:  {} : ---------", traceMessage);
 	}
 
 }

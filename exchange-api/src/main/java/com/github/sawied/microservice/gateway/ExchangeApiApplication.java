@@ -38,7 +38,7 @@ public class ExchangeApiApplication implements WebMvcConfigurer {
 		service.setCredentials(credentials);
 		service.setUrl(new URI(url));
 		service.setTraceListener(new MailTraceListener());
-		service.setTraceEnabled(true);
+		service.setTraceEnabled(false);
 		return service;
 	}
 	

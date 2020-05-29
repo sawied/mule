@@ -1,5 +1,6 @@
 package com.github.sawied.microservice.gateway.ews;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -14,26 +15,37 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.FileCopyUtils;
+
 import microsoft.exchange.webservices.data.core.PropertySet;
 import microsoft.exchange.webservices.data.core.enumeration.property.BasePropertySet;
 import microsoft.exchange.webservices.data.core.enumeration.property.BodyType;
 import microsoft.exchange.webservices.data.core.enumeration.property.DefaultExtendedPropertySet;
 import microsoft.exchange.webservices.data.core.enumeration.property.MapiPropertyType;
 import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
+import microsoft.exchange.webservices.data.core.enumeration.search.ComparisonMode;
+import microsoft.exchange.webservices.data.core.enumeration.search.ContainmentMode;
 import microsoft.exchange.webservices.data.core.enumeration.search.SortDirection;
 import microsoft.exchange.webservices.data.core.enumeration.service.ConflictResolutionMode;
 import microsoft.exchange.webservices.data.core.enumeration.service.MessageDisposition;
+import microsoft.exchange.webservices.data.core.exception.service.local.ServiceVersionException;
 import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
 import microsoft.exchange.webservices.data.core.service.item.Item;
 import microsoft.exchange.webservices.data.core.service.response.ResponseMessage;
 import microsoft.exchange.webservices.data.core.service.schema.EmailMessageSchema;
 import microsoft.exchange.webservices.data.core.service.schema.ItemSchema;
+import microsoft.exchange.webservices.data.core.service.schema.ServiceObjectSchema;
 import microsoft.exchange.webservices.data.property.complex.AttachmentCollection;
+import microsoft.exchange.webservices.data.property.complex.FileAttachment;
 import microsoft.exchange.webservices.data.property.complex.FolderId;
 import microsoft.exchange.webservices.data.property.complex.InternetMessageHeader;
+import microsoft.exchange.webservices.data.property.complex.ItemAttachment;
 import microsoft.exchange.webservices.data.property.complex.ItemId;
+import microsoft.exchange.webservices.data.property.complex.Mailbox;
 import microsoft.exchange.webservices.data.property.complex.MessageBody;
+import microsoft.exchange.webservices.data.property.complex.MimeContent;
 import microsoft.exchange.webservices.data.property.definition.ExtendedPropertyDefinition;
+import microsoft.exchange.webservices.data.property.definition.PropertyDefinition;
 import microsoft.exchange.webservices.data.property.definition.PropertyDefinitionBase;
 import microsoft.exchange.webservices.data.search.FindItemsResults;
 import microsoft.exchange.webservices.data.search.ItemView;
@@ -41,7 +53,7 @@ import microsoft.exchange.webservices.data.search.filter.SearchFilter;
 
 public class ExchangeAPI implements InitializingBean {
 	
-	private static final UUID CID = UUID.fromString("01638372-9F96-43b2-A403-B504ED14A910");
+	private static final UUID CID = UUID.fromString("12c70a2e-22be-494c-a4b1-9a40c921433f");
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ExchangeAPI.class);
 	
@@ -54,7 +66,7 @@ public class ExchangeAPI implements InitializingBean {
 
 
 	
-	@Value("ews.email.mailboxs")
+	@Value("${ews.email.mailboxs}")
 	private String emailBoxs=null;
 	
 	
@@ -115,16 +127,18 @@ public class ExchangeAPI implements InitializingBean {
 			view.setPropertySet(propertySet);
 			
 			//search filter 
-			SearchFilter searchFilter = new SearchFilter.Not(new SearchFilter.Exists(extendedPropertyDefinition));
+			//SearchFilter searchFilter = new SearchFilter.Not(new SearchFilter.Exists(extendedPropertyDefinition));
+			//SearchFilter searchFilter = new SearchFilter.IsEqualTo(EmailMessageSchema.From, "li.jia@foxmail.com");
+			SearchFilter searchFilter = new SearchFilter.ContainsSubstring(EmailMessageSchema.Subject, "duplicate email attachment name", ContainmentMode.Substring, ComparisonMode.IgnoreCase);
 			
 			boolean moreItems = true;
 			ItemId anchorId = null;
 			
-			//final Mailbox mailbox = new Mailbox(mail);
-			FolderId folderId = new FolderId(WellKnownFolderName.Inbox);
+			final Mailbox mailbox = new Mailbox(mail);
+			FolderId folderId = new FolderId(WellKnownFolderName.Inbox,mailbox);
 			
 			while(moreItems){
-				FindItemsResults<Item> findItems = exchangeService.findItems(folderId,/** searchFilter,**/ view);
+				FindItemsResults<Item> findItems = exchangeService.findItems(folderId,searchFilter, view);
 				moreItems=findItems.isMoreAvailable();
 				if(moreItems && anchorId !=null){
 					if(findItems.getItems().get(0).getId()!=anchorId){
@@ -153,9 +167,15 @@ public class ExchangeAPI implements InitializingBean {
 			    	 Item item = findItems.getItems().get(j);
 			    	 if(item instanceof EmailMessage){
 			    		 EmailMessage emailMessage = (EmailMessage) item;
+			    		 
 			    		 printEmailMessage(emailMessage);
-			    		 emailMessage.setExtendedProperty(extendedPropertyDefinition, 1);
-			    		 exchangeService.updateItem(item, FolderId.getFolderIdFromWellKnownFolderName(WellKnownFolderName.Inbox), ConflictResolutionMode.AutoResolve, MessageDisposition.SaveOnly, null);
+			    		 if(emailMessage.getSubject().contains("duplicate email")){
+			    			emailMessage.removeExtendedProperty(extendedPropertyDefinition);
+				    		 //emailMessage.setExtendedProperty(extendedPropertyDefinition, 1);
+				    		 exchangeService.updateItem(item, FolderId.getFolderIdFromWellKnownFolderName(WellKnownFolderName.Inbox), ConflictResolutionMode.AutoResolve, MessageDisposition.SaveOnly, null);
+				    		 System.out.println("changed!");
+			    		 }
+			    		
 			    	 }
 			     }
 			}
@@ -202,6 +222,46 @@ public class ExchangeAPI implements InitializingBean {
 		System.out.println("text only:" + textOnly);
 		System.out.println("itemId:" + itemId.getUniqueId());
 		
+	
+			AttachmentCollection attachements = email.getAttachments();
+			attachements.getItems().stream().forEach((item)->{
+				try {
+					String itemName=item.getClass().getName();
+					System.out.println("item class name :" + itemName);
+					String name = item.getName();
+					boolean isInline = item.getIsInline();
+					String contentId = item.getContentId();
+					
+					System.out.println("attachment name :" + name);
+					System.out.println("attachment isInline :" + isInline);
+					System.out.println("attachment contentId :" + contentId);
+					
+					if(item instanceof ItemAttachment){
+						ItemAttachment itemAttachment = (ItemAttachment) item;
+						itemAttachment.load(ItemSchema.MimeContent);
+						ServiceObjectSchema schema=itemAttachment.getItem().getSchema();
+						System.out.println("item attachment :" + item.getName());
+						System.out.println("item attachment content type:" + item.getContentType());
+						System.out.println("item schema :" + schema);
+						MimeContent mimeContent = itemAttachment.getItem().getMimeContent();
+						if(schema!=null && schema instanceof EmailMessageSchema) {
+							System.out.println("this is a email attachment witm msg.");
+						}
+						String charset=mimeContent.getCharacterSet();
+						System.out.println("charset:"+ charset);
+						byte[] bytes=mimeContent.getContent();
+						FileCopyUtils.copy(bytes, new File("11.eml"));
+					}
+					
+					
+				} catch (Exception e) {
+					
+					e.printStackTrace();
+				}
+				
+			});
+		
+		
 	}
 	
 	/**
@@ -236,6 +296,21 @@ public class ExchangeAPI implements InitializingBean {
 			 
 		}else{
 			LOG.error("mail box setting is empty.");
+		}
+		
+		
+	}
+	
+	public void printEmailinfoByItemId(String id) {
+		exchangeService.releaseConnection();
+		ItemId itemId;
+		try {
+			itemId = ItemId.getItemIdFromString(id);
+			EmailMessage emailMessage = EmailMessage.bind(exchangeService, itemId);
+			printEmailMessage(emailMessage);
+		} catch (Exception e) {
+	
+			e.printStackTrace();
 		}
 		
 		
